@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Hesam · Digital Alchemist</title>
+
+    <!-- Font Awesome 6 (Pro-like) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <!-- Google Fonts · more personality -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Lenis (buttery smooth) -->
+    <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.23/dist/lenis.css">
+    <script src="https://unpkg.com/lenis@1.3.23/dist/lenis.min.js"></script>
+
+    <!-- GSAP + ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <style>
+        /* ———— RESET & BASE ———— */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        ::selection {
+            background: transparent;
+        }
+
+        body {
+            background: #0e0e0e;
+            font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+            color: #f0f0f0;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        /* ———— LENIS OVERRIDES ———— */
+        html.lenis {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+
+        /* ———— SCROLLBAR ———— */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d94f2a;
+            border-radius: 10px;
+        }
+
+        /* ———— LOADER ———— */
+        .loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #0e0e0e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .loader.hide {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loader-ring {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 2px solid rgba(217, 79, 42, 0.15);
+            border-top: 2px solid #d94f2a;
+            animation: spin 0.9s cubic-bezier(0.6, 0, 0.4, 1) infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .loader-label {
+            margin-top: 24px;
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ———— MAIN WRAP ———— */
+        .site {
+            opacity: 0;
+            transition: opacity 0.9s ease;
+        }
+        .site.show {
+            opacity: 1;
+        }
+
+        /* ———— GLASS NAV ———— */
+        .glass-nav {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(24px) saturate(1.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 80px;
+            padding: 6px 14px 6px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+        .glass-nav a {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            color: rgba(255, 255, 255, 0.55);
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 40px;
+            transition: 0.25s ease;
+        }
+        .glass-nav a:hover {
+            background: rgba(217, 79, 42, 0.15);
+            color: #fff;
+        }
+        .nav-star {
+            width: 40px;
+            height: 40px;
+            background: #d94f2a;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.25s ease;
+            box-shadow: 0 4px 20px rgba(217, 79, 42, 0.3);
+        }
+        .nav-star:hover {
+            transform: scale(1.04);
+            border-radius: 16px;
+        }
+        .nav-star i {
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        /* ———— POPUP MENU ———— */
+        .popup-menu {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.92);
+            z-index: 999;
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(32px) saturate(1.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 56px;
+            padding: 18px 28px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+        }
+        .popup-menu.open {
+            transform: translateX(-50%) scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+        .popup-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .popup-links a {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.2s ease;
+        }
+        .popup-links a:hover {
+            background: #d94f2a;
+            color: #fff;
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        /* ———— LANGUAGE TOGGLE ———— */
+        .lang-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.6rem;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px 12px 4px 16px;
+            border-radius: 40px;
+            white-space: nowrap;
+        }
+        .lang-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s ease;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .lang-btn:hover {
+            background: #d94f2a;
+            color: #fff;
+        }
+
+        /* ———— PAGES ———— */
+        .page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 60px 24px;
+        }
+
+        /* —— HERO —— */
+        .hero {
+            background: #0e0e0e;
+            text-align: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .hero .eyebrow {
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.02);
+            padding: 6px 18px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+        .hero h1 {
+            font-size: clamp(3rem, 15vw, 9rem);
+            font-weight: 800;
+            line-height: 0.95;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #f0f0f0 40%, #d94f2a 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero .sub {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 400;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+        .hero .meta-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px 50px;
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.5px;
+        }
+        .hero .meta-grid span i {
+            margin-right: 8px;
+            color: #d94f2a;
+        }
+        .hero .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 30px;
+        }
+        .hero .badge-row span {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* —— ABOUT —— */
+        .about {
+            background: #111111;
+            gap: 60px;
+            flex-wrap: wrap;
+        }
+        .about .avatar {
+            width: 240px;
+            height: 240px;
+            background: linear-gradient(145deg, #d94f2a, #b33d1f);
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 30px 60px rgba(217, 79, 42, 0.2);
+            flex-shrink: 0;
+        }
+        .about .bio {
+            max-width: 540px;
+        }
+        .about .bio h2 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+        }
+        .about .bio h2 span {
+            color: #d94f2a;
+        }
+        .about .bio p {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        .about .bio .pill {
+            display: inline-block;
+            background: rgba(217, 79, 42, 0.15);
+            color: #d94f2a;
+            padding: 6px 22px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* —— WHO + MAP —— */
+        .who {
+            background: #0e0e0e;
+            gap: 50px;
+            flex-wrap: wrap;
+        }
+        .who .card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 48px;
+            padding: 40px 36px;
+            flex: 1 1 320px;
+            min-width: 260px;
+        }
+        .who .card h3 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .who .card p {
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+        .who .info-grid {
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .who .info-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .who .info-row i {
+            width: 36px;
+            height: 36px;
+            background: rgba(217, 79, 42, 0.12);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d94f2a;
+            font-size: 0.9rem;
+        }
+        .who .info-row .label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.2);
+        }
+        .who .info-row .value {
+            font-weight: 600;
+            color: #f0f0f0;
+        }
+
+        .map-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 48px;
+            padding: 40px 36px;
+            text-align: center;
+            flex: 1 1 260px;
+        }
+        .map-card svg {
+            max-width: 160px;
+            width: 100%;
+            filter: drop-shadow(0 10px 30px rgba(217, 79, 42, 0.1));
+            margin: 16px 0;
+        }
+        .map-card .city-tag {
+            display: inline-block;
+            background: rgba(217, 79, 42, 0.08);
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin: 4px;
+        }
+
+        /* —— SKILLS —— */
+        .skills {
+            background: #111111;
+            flex-direction: column;
+            gap: 50px;
+            padding: 80px 24px;
+        }
+        .skills .section-label {
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.15);
+            margin-bottom: 10px;
+        }
+        .skills .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .skill-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 40px;
+            padding: 28px 24px;
+            transition: 0.25s ease;
+        }
+        .skill-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-4px);
+        }
+        .skill-card .head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .skill-card .head i {
+            font-size: 1.8rem;
+            color: #d94f2a;
+        }
+        .skill-card .head h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .skill-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .skill-row .meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .skill-row .bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .skill-row .bar .fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #d94f2a, #f06a42);
+            border-radius: 10px;
+            transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* —— INTERESTS —— */
+        .interests {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            border-radius: 60px;
+            padding: 36px 28px;
+            text-align: center;
+        }
+        .interests .title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        .interests .title i {
+            color: #d94f2a;
+            margin-right: 10px;
+        }
+        .interests .chips {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .interests .chips span {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            transition: 0.2s ease;
+            cursor: default;
+        }
+        .interests .chips span:hover {
+            background: rgba(217, 79, 42, 0.12);
+            color: #f0f0f0;
+            border-color: rgba(217, 79, 42, 0.2);
+        }
+        .interests .chips span i {
+            margin-right: 8px;
+            color: #d94f2a;
+        }
+
+        /* —— VERTICAL BARS —— */
+        .v-bars {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            border-radius: 60px;
+            padding: 36px 28px;
+            text-align: center;
+        }
+        .v-bars .title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 28px;
+        }
+        .v-bars .title i {
+            color: #d94f2a;
+            margin-right: 10px;
+        }
+        .bars-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+        .bar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .bar-item .track {
+            width: 44px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 40px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .bar-item .track .fill {
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, #d94f2a, #f06a42);
+            border-radius: 40px;
+            transition: height 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .bar-item .label {
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: 500;
+        }
+        .bar-item .pct {
+            font-size: 0.6rem;
+            color: #d94f2a;
+            font-weight: 600;
+        }
+
+        /* —— PROJECTS —— */
+        .projects {
+            background: #0e0e0e;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .projects .glass {
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 60px;
+            padding: 50px 36px;
+            text-align: center;
+            max-width: 1000px;
+            width: 100%;
+        }
+        .projects .glass h2 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .projects .glass .soon {
+            display: inline-block;
+            background: rgba(217, 79, 42, 0.12);
+            color: #d94f2a;
+            padding: 4px 20px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+        .projects .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 24px;
+        }
+        .projects .grid .item {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 32px;
+            padding: 28px 16px;
+            transition: 0.2s ease;
+        }
+        .projects .grid .item:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .projects .grid .item .icon {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+        }
+        .projects .grid .item h4 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .projects .grid .item p {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* —— FAQ —— */
+        .faq {
+            background: #111111;
+        }
+        .faq .glass {
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 60px;
+            padding: 50px 36px;
+            max-width: 800px;
+            width: 100%;
+        }
+        .faq .glass h2 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .faq-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 16px 0;
+            cursor: pointer;
+        }
+        .faq-item .q {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .faq-item .q i {
+            color: #d94f2a;
+            transition: 0.3s ease;
+        }
+        .faq-item.active .q i {
+            transform: rotate(180deg);
+        }
+        .faq-item .a {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .faq-item.active .a {
+            max-height: 200px;
+            padding-top: 12px;
+        }
+
+        /* —— CONTACT —— */
+        .contact {
+            background: #0e0e0e;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .contact .glass {
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 60px;
+            padding: 50px 40px;
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+        }
+        .contact .glass .big {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .contact .glass .line {
+            width: 60px;
+            height: 2px;
+            background: #d94f2a;
+            margin: 12px auto 24px;
+        }
+        .contact .socials {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .contact .socials a {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1.8rem;
+            transition: 0.2s ease;
+        }
+        .contact .socials a:hover {
+            color: #d94f2a;
+            transform: translateY(-4px);
+        }
+        .contact .details {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.9rem;
+        }
+        .contact .details i {
+            color: #d94f2a;
+            margin-right: 6px;
+        }
+        .contact .footnote {
+            margin-top: 20px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.15);
+            letter-spacing: 1px;
+        }
+
+        /* —— FOOTER —— */
+        .footer {
+            background: #080808;
+            padding: 50px 30px 30px;
+            border-radius: 40px 40px 0 0;
+        }
+        .footer .inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 40px;
+        }
+        .footer .col h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .footer .col p,
+        .footer .col a {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 0.85rem;
+            line-height: 1.8;
+            text-decoration: none;
+            display: block;
+        }
+        .footer .col a:hover {
+            color: #d94f2a;
+        }
+        .footer .bottom {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.02);
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.1);
+        }
+        .footer .bottom span {
+            color: #d94f2a;
+        }
+
+        /* —— RESPONSIVE —— */
+        @media (max-width: 768px) {
+            .glass-nav {
+                padding: 4px 10px 4px 14px;
+                gap: 4px;
+                bottom: 18px;
+            }
+            .glass-nav a {
+                font-size: 0.6rem;
+                padding: 4px 10px;
+            }
+            .nav-star {
+                width: 34px;
+                height: 34px;
+            }
+            .popup-menu {
+                padding: 14px 16px;
+                bottom: 80px;
+                border-radius: 40px;
+            }
+            .popup-links a {
+                font-size: 0.65rem;
+                padding: 6px 12px;
+            }
+            .about .avatar {
+                width: 160px;
+                height: 160px;
+                font-size: 2.8rem;
+                border-radius: 40px;
+            }
+            .about .bio h2 {
+                font-size: 2rem;
+            }
+            .who .card {
+                padding: 28px 20px;
+                border-radius: 32px;
+            }
+            .map-card {
+                padding: 28px 20px;
+                border-radius: 32px;
+            }
+            .skills .grid {
+                grid-template-columns: 1fr;
+            }
+            .projects .glass {
+                padding: 30px 20px;
+                border-radius: 40px;
+            }
+            .projects .glass h2 {
+                font-size: 2rem;
+            }
+            .faq .glass {
+                padding: 30px 20px;
+                border-radius: 40px;
+            }
+            .faq .glass h2 {
+                font-size: 1.8rem;
+            }
+            .contact .glass {
+                padding: 30px 20px;
+                border-radius: 40px;
+            }
+            .contact .glass .big {
+                font-size: 2.2rem;
+            }
+            .footer .inner {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 3.4rem;
+            }
+            .hero .meta-grid {
+                gap: 14px 24px;
+                font-size: 0.65rem;
+            }
+            .about .bio h2 {
+                font-size: 1.6rem;
+            }
+            .bars-wrap {
+                gap: 10px;
+            }
+            .bar-item .track {
+                width: 32px;
+                height: 80px;
+            }
+            .lang-wrap {
+                font-size: 0.5rem;
+                padding: 2px 8px 2px 10px;
+            }
+            .lang-btn {
+                width: 22px;
+                height: 22px;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOADER -->
+    <div class="loader" id="loader">
+        <div class="loader-ring"></div>
+        <div class="loader-label">loading</div>
+    </div>
+
+    <!-- SITE -->
+    <div class="site" id="site">
+
+        <!-- GLASS NAV -->
+        <nav class="glass-nav">
+            <a href="#hero" data-nav="home">Home</a>
+            <div class="nav-star" id="menuStar"><i class="fas fa-plus"></i></div>
+            <a href="#contact" data-nav="contact">Contact</a>
+            <div class="lang-wrap">
+                <span id="langLabel">EN</span>
+                <button class="lang-btn" id="langToggle"><i class="fas fa-globe"></i></button>
+            </div>
+        </nav>
+
+        <!-- POPUP MENU -->
+        <div class="popup-menu" id="popupMenu">
+            <div class="popup-links">
+                <a href="#about" data-nav="about">✦ About</a>
+                <a href="#who" data-nav="who">✦ Who</a>
+                <a href="#skills" data-nav="skills">✦ Skills</a>
+                <a href="#projects" data-nav="projects">✦ Projects</a>
+                <a href="#faq" data-nav="faq">✦ FAQ</a>
+            </div>
+        </div>
+
+        <!-- ===== HERO ===== -->
+        <section class="page hero" id="hero">
+            <div class="eyebrow" id="heroEyebrow">✦ digital alchemist</div>
+            <h1 id="heroTitle">Hesam</h1>
+            <div class="sub" id="heroSub">I don't code — I command AI</div>
+            <div class="meta-grid">
+                <span><i class="fas fa-calendar-alt"></i> <span id="heroDate">2007 . 07 . 19</span></span>
+                <span><i class="fas fa-map-pin"></i> <span id="heroLocation">Gorgan, Iran</span></span>
+                <span><i class="fas fa-code"></i> <span id="heroExp">11+ years</span></span>
+            </div>
+            <div class="badge-row">
+                <span>⚡ AI Orchestrator</span>
+                <span>🎮 Gamer</span>
+                <span>📈 Crypto</span>
+                <span>🎨 Designer</span>
+            </div>
+        </section>
+
+        <!-- ===== ABOUT ===== -->
+        <section class="page about" id="about">
+            <div class="avatar">🧠</div>
+            <div class="bio">
+                <h2>About <span>Me</span></h2>
+                <p id="aboutText">I'm Hesam. I don't code — I command AI to do it for me. Glued to computers since I was a kid, I've mastered the digital playground: gaming, crypto, markets. Photoshop? Got it. Video editing? All on mobile, clean. I don't just use tech — I bend it.</p>
+                <span class="pill">✦ Available for work ✦</span>
+            </div>
+        </section>
+
+        <!-- ===== WHO + MAP ===== -->
+        <section class="page who" id="who">
+            <div class="card">
+                <h3>Who Am I?</h3>
+                <p id="whoText1">Hey! Glad you made it. I'm Hesam, born and raised in Gorgan, Golestan, Iran.</p>
+                <p id="whoText2" style="margin-top: 10px;">Into digital spaces since I was 8 — always learning, always leveling up.</p>
+                <div class="info-grid">
+                    <div class="info-row">
+                        <i class="fas fa-birthday-cake"></i>
+                        <div><span class="label">Birthday</span><br><span class="value" id="whoBirthday">July 19, 2007</span></div>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div><span class="label">Location</span><br><span class="value" id="whoLocation">Gorgan, Iran</span></div>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-code"></i>
+                        <div><span class="label">Experience</span><br><span class="value" id="whoExp">11+ Years</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-card">
+                <h3 style="font-size:1.3rem; font-weight:600; margin-bottom:4px;"><i class="fas fa-map-marked-alt" style="color:#d94f2a; margin-right:8px;"></i> My Homeland</h3>
+                <svg viewBox="0 0 200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M95,20 L105,22 L115,30 L118,42 L125,48 L128,58 L125,68 L130,78 L128,88 L120,95 L112,100 L105,108 L98,110 L88,108 L80,102 L75,92 L70,82 L68,72 L72,62 L78,54 L82,44 L88,34 L92,26 L95,20Z" fill="#d94f2a" stroke="#b33d1f" stroke-width="1.5" stroke-linejoin="round" opacity="0.85"/>
+                    <path d="M105,45 L112,52 L115,62 L112,72 L108,75 L102,72 L98,65 L96,56 L100,48 L105,45Z" fill="#f06a42" stroke="#b33d1f" stroke-width="1"/>
+                    <circle cx="102" cy="68" r="3" fill="#FFD966" stroke="#b37b2e" stroke-width="0.8"/>
+                    <text x="85" y="30" font-size="6" fill="#f5e6d3" font-weight="bold">IRAN</text>
+                </svg>
+                <div style="font-size:0.75rem; color:rgba(255,255,255,0.3);" id="mapLocation">🇮🇷 Gorgan, Golestan — North of Iran</div>
+                <div style="margin-top:12px; display:flex; flex-wrap:wrap; justify-content:center; gap:6px;">
+                    <span class="city-tag">🏔️ Alborz</span>
+                    <span class="city-tag">🌊 Caspian Sea</span>
+                    <span class="city-tag">🌿 Green Nature</span>
+                </div>
+                <p style="margin-top:16px; font-size:0.8rem; color:rgba(255,255,255,0.2);">Living in the historic and green city of Gorgan, inspired by rich Persian culture.</p>
+            </div>
+        </section>
+
+        <!-- ===== SKILLS ===== -->
+        <section class="page skills" id="skills">
+            <div class="section-label" id="skillsLabel">✦ my expertise</div>
+            <p style="text-align:center; color:rgba(255,255,255,0.2); max-width:500px; font-size:0.9rem;" id="skillsDesc">Numbers & charts — each skill indicates my level of ability.</p>
+
+            <!-- Interests -->
+            <div class="interests">
+                <div class="title"><i class="fas fa-heart"></i> <span id="interestsTitle">Interests & Hobbies</span></div>
+                <div class="chips" id="interestsChips"></div>
+            </div>
+
+            <!-- Skill Cards -->
+            <div class="grid" id="skillsGrid"></div>
+
+            <!-- Vertical Bars -->
+            <div class="v-bars">
+                <div class="title"><i class="fas fa-chart-simple"></i> <span id="highlightsTitle">Skill Highlights</span></div>
+                <div class="bars-wrap" id="barsWrap"></div>
+            </div>
+        </section>
+
+        <!-- ===== PROJECTS ===== -->
+        <section class="page projects" id="projects">
+            <div class="glass">
+                <h2 id="projectsTitle">My Projects</h2>
+                <div class="soon" id="projectsBadge">✨ Coming Soon ✨</div>
+                <div class="grid" id="projectsGrid"></div>
+            </div>
+        </section>
+
+        <!-- ===== FAQ ===== -->
+        <section class="page faq" id="faq">
+            <div class="glass">
+                <h2 id="faqTitle">Frequently Asked Questions</h2>
+                <div id="faqItems"></div>
+            </div>
+        </section>
+
+        <!-- ===== CONTACT ===== -->
+        <section class="page contact" id="contact">
+            <div class="glass">
+                <div class="big" id="contactBig">Let's Talk</div>
+                <div class="line"></div>
+                <p style="color:rgba(255,255,255,0.2); margin-bottom:24px;" id="contactDesc">If you have any questions or would like to collaborate, I'd be happy to hear from you.</p>
+                <div class="socials" id="contactSocials"></div>
+                <div class="details" id="contactDetails">
+                    <span><i class="fas fa-phone-alt"></i> <span id="contactPhone">+98 911 410 4923</span></span>
+                    <span style="margin:0 12px;">|</span>
+                    <span><i class="fas fa-envelope"></i> <span id="contactEmail">madpro01034@gmail.com</span></span>
+                </div>
+                <div style="margin-top:16px; font-size:0.7rem; color:rgba(255,255,255,0.1);" id="contactLocation2"><i class="fas fa-map-marker-alt" style="color:#d94f2a; margin-right:4px;"></i> IRAN, Gorgan</div>
+                <div class="footnote" id="contactAvail">Available for freelance & collaboration</div>
+            </div>
+        </section>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="footer">
+            <div class="inner">
+                <div class="col">
+                    <h4 id="footerBrand">Hesam</h4>
+                    <p id="footerTagline">Front-end developer & designer<br>Creating modern digital experiences</p>
+                </div>
+                <div class="col">
+                    <h4 id="footerQuick">Quick Links</h4>
+                    <a href="#hero">Home</a>
+                    <a href="#about">About</a>
+                    <a href="#who">Who</a>
+                    <a href="#skills">Skills</a>
+                    <a href="#projects">Projects</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                <div class="col">
+                    <h4 id="footerContactTitle">Contact Info</h4>
+                    <p>📞 +98 911 410 4923</p>
+                    <p>✉️ madpro01034@gmail.com</p>
+                    <p>📍 Gorgan, Iran</p>
+                </div>
+            </div>
+            <div class="bottom">
+                &copy; 2025 <span>Hesam</span>. All rights reserved. | Designed with ❤️
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ———————————————————————————————————————
+        // DATA (EN / FA)
+        // ———————————————————————————————————————
+        const DATA = {
+            en: {
+                nav: { home: 'Home', about: '✦ About', who: '✦ Who', skills: '✦ Skills', projects: '✦ Projects', faq: '✦ FAQ',
+                contact: 'Contact' },
+                hero: { eyebrow: '✦ digital alchemist', title: 'Hesam', sub: "I don't code — I command AI",
+                date: '2007 . 07 . 19', location: 'Gorgan, Iran', exp: '11+ years' },
+                about: { text: "I'm Hesam. I don't code — I command AI to do it for me. Glued to computers since I was a kid, I've mastered the digital playground: gaming, crypto, markets. Photoshop? Got it. Video editing? All on mobile, clean. I don't just use tech — I bend it." },
+                who: { text1: "Hey! Glad you made it. I'm Hesam, born and raised in Gorgan, Golestan, Iran.",
+                    text2: "Into digital spaces since I was 8 — always learning, always leveling up.",
+                    birthday: 'July 19, 2007', location: 'Gorgan, Iran', exp: '11+ Years' },
+                map: { location: '🇮🇷 Gorgan, Golestan — North of Iran' },
+                skills: { label: '✦ my expertise', desc: 'Numbers & charts — each skill indicates my level of ability.',
+                    interests: 'Interests & Hobbies',
+                    highlights: 'Skill Highlights',
+                    categories: [{
+                        title: 'Skill - 1',
+                        icon: 'fas fa-rocket',
+                        skills: [
+                            { name: 'Computer', icon: 'fas fa-desktop', pct: 90 },
+                            { name: 'Gaming', icon: 'fas fa-gamepad', pct: 85 },
+                            { name: 'Coding', icon: 'fas fa-code', pct: 50 },
+                            { name: 'English', icon: 'fas fa-language', pct: 35 }
+                        ]
+                    }, {
+                        title: 'Skill - 2',
+                        icon: 'fas fa-tools',
+                        skills: [
+                            { name: 'Fixing App', icon: 'fas fa-gear', pct: 90 },
+                            { name: 'Git & GitHub', icon: 'fab fa-git-alt', pct: 50 },
+                            { name: 'PhotoShop', icon: 'fas fa-paint-brush', pct: 48 },
+                            { name: 'AlightMotion', icon: 'fas fa-pen-fancy', pct: 42 }
+                        ]
+                    }, {
+                        title: 'Skill - 3',
+                        icon: 'fas fa-chart-line',
+                        skills: [
+                            { name: 'AI & ChatGPT', icon: 'fas fa-brain', pct: 60 },
+                            { name: 'Social Media', icon: 'fas fa-globe', pct: 90 },
+                            { name: 'Crypto', icon: 'fas fa-coins', pct: 50 },
+                            { name: 'Arzdigital', icon: 'fas fa-book', pct: 50 }
+                        ]
+                    }],
+                    interests_items: [
+                        'Computer', 'Gaming', 'Coding', 'AI', 'Crypto', 'English', 'Designer', 'Editor'
+                    ],
+                    highlights_data: [
+                        { label: 'Computer', pct: 90 },
+                        { label: 'Gaming', pct: 90 },
+                        { label: 'Crypto', pct: 50 },
+                        { label: 'Arzdigital', pct: 50 },
+                        { label: 'Social Media', pct: 90 },
+                        { label: 'English', pct: 35 },
+                        { label: 'PhotoShop', pct: 40 },
+                        { label: 'Editor', pct: 40 },
+                        { label: 'AI', pct: 60 }
+                    ]
+                },
+                projects: { title: 'My Projects', badge: '✨ Coming Soon ✨',
+                    items: [
+                        { icon: '⚙️', title: 'Coming Soon - 1', desc: '.....................' },
+                        { icon: '⛩️', title: 'Coming Soon - 2', desc: '.....................' },
+                        { icon: '🐲', title: 'Coming Soon - 3', desc: '.....................' }
+                    ] },
+                faq: { title: 'Frequently Asked Questions',
+                    items: [
+                        { q: 'How do you code with AI?',
+                            a: 'I use ChatGPT and Claude. I give ideas, write prompts, test, and finalize. I don\'t code — I command.' },
+                        { q: 'How did you get into digital space as a kid?',
+                            a: 'Started with computers at 8, got into gaming, then the internet, then crypto and digital marketing. Pure curiosity.' },
+                        { q: 'Do you accept collaborations?',
+                            a: 'Yes! If you have a project in my areas, I\'d love to work with you. Just know — I work with AI.' },
+                        { q: 'Where do you see yourself in the future?',
+                            a: 'Staying in the digital lane, never stopping learning, leveling up every day. I wanna make a name in crypto and digital content.' },
+                        { q: 'How can I reach you?',
+                            a: 'Hit me up on social media — check the contact section. Telegram or Discord is where I reply fastest.' }
+                    ] },
+                contact: { big: "Let's Talk", desc: "If you have any questions or would like to collaborate, I'd be happy to hear from you.",
+                    phone: '+98 911 410 4923', email: 'madpro01034@gmail.com', location: 'IRAN, Gorgan',
+                    avail: 'Available for freelance & collaboration',
+                    socials: [
+                        { platform: 'Instagram', icon: 'fab fa-instagram',
+                            url: 'https://www.instagram.com/knownashesam' },
+                        { platform: 'Twitter', icon: 'fab fa-twitter', url: 'https://X.com/KnownAsHesam' },
+                        { platform: 'GitHub', icon: 'fab fa-github', url: 'https://Github.com/DiamondAsHesam' },
+                        { platform: 'LinkedIn', icon: 'fab fa-linkedin',
+                            url: 'https://www.linkedin.com/in/known-ashesam-399039413' },
+                        { platform: 'Telegram', icon: 'fab fa-telegram', url: 'https://t.me/DiamondAsHesam' },
+                        { platform: 'Discord', icon: 'fab fa-discord', url: 'https://discord.gg/MWr2QCCMTv' }
+                    ] },
+                footer: { brand: 'Hesam', tagline: 'Front-end developer & designer<br>Creating modern digital experiences',
+                    quick: 'Quick Links', contact: 'Contact Info' }
+            },
+            fa: {
+                nav: { home: 'خانه', about: '✦ درباره', who: '✦ من', skills: '✦ مهارت‌ها', projects: '✦ پروژه‌ها',
+                    faq: '✦ سوالات', contact: 'تماس' },
+                hero: { eyebrow: '✦ کیمیاگر دیجیتال', title: 'حسام', sub: 'کد نمی‌نویسم — به AI دستور می‌دم',
+                    date: '۱۳۸۶ . ۰۴ . ۲۸', location: 'گرگان، ایران', exp: '+۱۱ سال' },
+                about: { text: "من حسام هستم. کد نمی‌نویسم — به AI دستور می‌دم برام کد بنویسه. از بچگی به کامپیوتر چسبیدم و توی فضای دیجیتال استاد شدم: بازی، ارز دیجیتال، بازارها. فتوشاپ؟ بلدم. تدوین ویدیو؟ همه رو روی موبایل انجام می‌دم و تمیز درش می‌ارم. فقط از تکنولوژی استفاده نمی‌کنم — بهش فرمان می‌دم." },
+                who: { text1: "سلام! خوشحالم که اومدی. من حسام هستم، متولد ۸۶ و ۲۸ تیر در گرگان، گلستان.",
+                    text2: "از ۸ سالگی وارد فضای دیجیتال شدم — و هنوز هم با قدرت ادامه می‌دم.",
+                    birthday: '۱۳۸۶/۰۴/۲۸', location: 'ایران، گرگان', exp: '+۱۱ سال' },
+                map: { location: '🇮🇷 گلستان، گرگان — شمال ایران' },
+                skills: { label: '✦ تخصص‌های من', desc: 'تخصص من در قالب اعداد و نمودارها — هر مهارت نشان‌دهنده سطح توانایی من است.',
+                    interests: 'علاقه‌مندی‌ها',
+                    highlights: 'نکات برجسته مهارت‌ها',
+                    categories: [{
+                        title: 'مهارت - ۱',
+                        icon: 'fas fa-rocket',
+                        skills: [
+                            { name: 'کامپیوتر', icon: 'fas fa-desktop', pct: 90 },
+                            { name: 'بازی', icon: 'fas fa-gamepad', pct: 85 },
+                            { name: 'برنامه‌نویسی', icon: 'fas fa-code', pct: 50 },
+                            { name: 'انگلیسی', icon: 'fas fa-language', pct: 35 }
+                        ]
+                    }, {
+                        title: 'مهارت - ۲',
+                        icon: 'fas fa-tools',
+                        skills: [
+                            { name: 'تعمیر اپ', icon: 'fas fa-gear', pct: 90 },
+                            { name: 'گیت و گیت‌هاب', icon: 'fab fa-git-alt', pct: 50 },
+                            { name: 'فتوشاپ', icon: 'fas fa-paint-brush', pct: 48 },
+                            { name: 'آلایت موشن', icon: 'fas fa-pen-fancy', pct: 42 }
+                        ]
+                    }, {
+                        title: 'مهارت - ۳',
+                        icon: 'fas fa-chart-line',
+                        skills: [
+                            { name: 'هوش مصنوعی و چت‌جی‌پی‌تی', icon: 'fas fa-brain', pct: 60 },
+                            { name: 'شبکه‌های اجتماعی', icon: 'fas fa-globe', pct: 90 },
+                            { name: 'کریپتو', icon: 'fas fa-coins', pct: 50 },
+                            { name: 'ارزدیجیتال', icon: 'fas fa-book', pct: 50 }
+                        ]
+                    }],
+                    interests_items: ['کامپیوتر', 'بازی', 'برنامه‌نویسی', 'هوش مصنوعی', 'کریپتو', 'انگلیسی', 'طراحی', 'تدوین'],
+                    highlights_data: [
+                        { label: 'کامپیوتر', pct: 90 },
+                        { label: 'بازی', pct: 90 },
+                        { label: 'کریپتو', pct: 50 },
+                        { label: 'ارزدیجیتال', pct: 50 },
+                        { label: 'شبکه‌های اجتماعی', pct: 90 },
+                        { label: 'انگلیسی', pct: 35 },
+                        { label: 'فتوشاپ', pct: 40 },
+                        { label: 'تدوین', pct: 40 },
+                        { label: 'هوش مصنوعی', pct: 60 }
+                    ]
+                },
+                projects: { title: 'پروژه‌های من', badge: '✨ به زودی ✨',
+                    items: [
+                        { icon: '⚙️', title: 'به زودی - ۱', desc: '.....................' },
+                        { icon: '⛩️', title: 'به زودی - ۲', desc: '.....................' },
+                        { icon: '🐲', title: 'به زودی - ۳', desc: '.....................' }
+                    ] },
+                faq: { title: 'سوالات متداول',
+                    items: [
+                        { q: 'چطور با هوش مصنوعی کد می‌نویسی؟',
+                            a: 'از چت‌جی‌پی‌تی و کلود استفاده می‌کنم. ایده می‌دم، پرامپت می‌نویسم، تست می‌کنم و نهایی‌سازی می‌کنم. کد نمی‌نویسم — فرمان می‌دم.' },
+                        { q: 'چطور از بچگی وارد فضای دیجیتال شدی؟',
+                            a: 'از ۸ سالگی با کامپیوتر شروع کردم، بعد بازی، بعد اینترنت، بعد ارز دیجیتال و بازاریابی دیجیتال. همه از روی کنجکاوی.' },
+                        { q: 'همکاری قبول می‌کنی؟',
+                            a: 'بله! اگه پروژه‌ای توی حوزه‌های من داری، خوشحال می‌شم باهات کار کنم. فقط بدون — من با AI کار می‌کنم.' },
+                        { q: 'خودت رو در آینده کجا می‌بینی؟',
+                            a: 'همین‌طور توی مسیر دیجیتال می‌مونم، هیچ‌وقت یادگیری رو متوقف نمی‌کنم، هر روز بهتر می‌شم.' },
+                        { q: 'چطور می‌تونم باهات تماس بگیرم؟',
+                            a: 'توی شبکه‌های اجتماعی پیام بده — بخش تماس رو ببین. تلگرام یا دیسکورد سریع‌ترین جواب رو می‌دم.' }
+                    ] },
+                contact: { big: 'بیا حرف بزنیم', desc: 'اگه سوالی داری یا می‌خوای باهات همکاری کنم، خوشحال می‌شم پیام بدی.',
+                    phone: '۰۹۱۱ ۴۱۰ ۴۹۲۳', email: 'madpro01034@gmail.com', location: 'ایران، گرگان',
+                    avail: 'آماده همکاری',
+                    socials: [
+                        { platform: 'اینستاگرام', icon: 'fab fa-instagram',
+                            url: 'https://www.instagram.com/knownashesam' },
+                        { platform: 'توییتر', icon: 'fab fa-twitter', url: 'https://X.com/KnownAsHesam' },
+                        { platform: 'گیت‌هاب', icon: 'fab fa-github', url: 'https://Github.com/DiamondAsHesam' },
+                        { platform: 'لینکدین', icon: 'fab fa-linkedin',
+                            url: 'https://www.linkedin.com/in/known-ashesam-399039413' },
+                        { platform: 'تلگرام', icon: 'fab fa-telegram', url: 'https://t.me/DiamondAsHesam' },
+                        { platform: 'دیسکورد', icon: 'fab fa-discord', url: 'https://discord.gg/MWr2QCCMTv' }
+                    ] },
+                footer: { brand: 'حسام', tagline: 'توسعه‌دهنده فرانت‌اند و طراح<br>ساخت تجربه‌های دیجیتال مدرن',
+                    quick: 'لینک‌های سریع', contact: 'اطلاعات تماس' }
+            }
+        };
+
+        // ———————————————————————————————————————
+        // STATE
+        // ———————————————————————————————————————
+        let lang = 'en';
+        const langLabel = document.getElementById('langLabel');
+
+        // ———————————————————————————————————————
+        // RENDER
+        // ———————————————————————————————————————
+        function render(l) {
+            const d = DATA[l];
+            if (!d) return;
+
+            // hero
+            document.getElementById('heroEyebrow').textContent = d.hero.eyebrow;
+            document.getElementById('heroTitle').textContent = d.hero.title;
+            document.getElementById('heroSub').textContent = d.hero.sub;
+            document.getElementById('heroDate').textContent = d.hero.date;
+            document.getElementById('heroLocation').textContent = d.hero.location;
+            document.getElementById('heroExp').textContent = d.hero.exp;
+
+            // about
+            document.getElementById('aboutText').textContent = d.about.text;
+
+            // who
+            document.getElementById('whoText1').textContent = d.who.text1;
+            document.getElementById('whoText2').textContent = d.who.text2;
+            document.getElementById('whoBirthday').textContent = d.who.birthday;
+            document.getElementById('whoLocation').textContent = d.who.location;
+            document.getElementById('whoExp').textContent = d.who.exp;
+            document.getElementById('mapLocation').textContent = d.map.location;
+
+            // skills
+            document.getElementById('skillsLabel').textContent = d.skills.label;
+            document.getElementById('skillsDesc').textContent = d.skills.desc;
+            document.getElementById('interestsTitle').textContent = d.skills.interests;
+            document.getElementById('highlightsTitle').textContent = d.skills.highlights;
+
+            // interests chips
+            const chips = document.getElementById('interestsChips');
+            chips.innerHTML = '';
+            const icons = ['fas fa-desktop', 'fas fa-gamepad', 'fas fa-code', 'fas fa-brain', 'fas fa-coins',
+                'fas fa-language', 'fas fa-paint-brush', 'fas fa-pen-fancy'
+            ];
+            d.skills.interests_items.forEach((item, i) => {
+                const span = document.createElement('span');
+                span.innerHTML = `<i class="${icons[i % icons.length]}"></i> ${item}`;
+                chips.appendChild(span);
+            });
+
+            // skill cards
+            const grid = document.getElementById('skillsGrid');
+            grid.innerHTML = '';
+            d.skills.categories.forEach(cat => {
+                const card = document.createElement('div');
+                card.className = 'skill-card';
+                let skillsHTML = '';
+                cat.skills.forEach(s => {
+                    skillsHTML += `
+                        <div class="skill-row">
+                            <div class="meta"><span><i class="${s.icon}" style="color:#d94f2a;margin-right:6px;"></i> ${s.name}</span><span>${s.pct}%</span></div>
+                            <div class="bar"><div class="fill" data-pct="${s.pct}"></div></div>
+                        </div>
+                    `;
+                });
+                card.innerHTML = `
+                    <div class="head"><i class="${cat.icon}"></i><h4>${cat.title}</h4></div>
+                    ${skillsHTML}
+                `;
+                grid.appendChild(card);
+            });
+
+            // vertical bars
+            const barsWrap = document.getElementById('barsWrap');
+            barsWrap.innerHTML = '';
+            d.skills.highlights_data.forEach(h => {
+                const item = document.createElement('div');
+                item.className = 'bar-item';
+                item.innerHTML = `
+                    <div class="track"><div class="fill" data-pct="${h.pct}"></div></div>
+                    <div class="label">${h.label}</div>
+                    <div class="pct">${h.pct}%</div>
+                `;
+                barsWrap.appendChild(item);
+            });
+
+            // projects
+            document.getElementById('projectsTitle').textContent = d.projects.title;
+            document.getElementById('projectsBadge').textContent = d.projects.badge;
+            const projGrid = document.getElementById('projectsGrid');
+            projGrid.innerHTML = '';
+            d.projects.items.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `<div class="icon">${p.icon}</div><h4>${p.title}</h4><p>${p.desc}</p>`;
+                projGrid.appendChild(div);
+            });
+
+            // faq
+            document.getElementById('faqTitle').textContent = d.faq.title;
+            const faqContainer = document.getElementById('faqItems');
+            faqContainer.innerHTML = '';
+            d.faq.items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'faq-item';
+                div.innerHTML = `
+                    <div class="q"><span>${item.q}</span><i class="fas fa-chevron-down"></i></div>
+                    <div class="a">${item.a}</div>
+                `;
+                faqContainer.appendChild(div);
+            });
+
+            // contact
+            document.getElementById('contactBig').textContent = d.contact.big;
+            document.getElementById('contactDesc').textContent = d.contact.desc;
+            document.getElementById('contactPhone').textContent = d.contact.phone;
+            document.getElementById('contactEmail').textContent = d.contact.email;
+            document.getElementById('contactLocation2').innerHTML =
+                `<i class="fas fa-map-marker-alt" style="color:#d94f2a;margin-right:4px;"></i> ${d.contact.location}`;
+            document.getElementById('contactAvail').textContent = d.contact.avail;
+
+            const socials = document.getElementById('contactSocials');
+            socials.innerHTML = '';
+            d.contact.socials.forEach(s => {
+                const a = document.createElement('a');
+                a.href = s.url;
+                a.setAttribute('aria-label', s.platform);
+                a.innerHTML = `<i class="${s.icon}"></i>`;
+                socials.appendChild(a);
+            });
+
+            // footer
+            document.getElementById('footerBrand').textContent = d.footer.brand;
+            document.getElementById('footerTagline').innerHTML = d.footer.tagline;
+            document.getElementById('footerQuick').textContent = d.footer.quick;
+            document.getElementById('footerContactTitle').textContent = d.footer.contact;
+
+            // nav
+            document.querySelectorAll('[data-nav]').forEach(el => {
+                const key = el.getAttribute('data-nav');
+                if (d.nav[key]) el.textContent = d.nav[key];
+            });
+
+            // lang label
+            langLabel.textContent = l === 'en' ? 'EN' : 'FA';
+
+            // re-init FAQ clicks
+            document.querySelectorAll('.faq-item').forEach(item => {
+                const q = item.querySelector('.q');
+                if (q) {
+                    q.addEventListener('click', function() {
+                        const parent = this.parentElement;
+                        const isActive = parent.classList.contains('active');
+                        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+                        if (!isActive) parent.classList.add('active');
+                    });
+                }
+            });
+
+            // animate bars after render (with slight delay)
+            setTimeout(() => {
+                document.querySelectorAll('.fill[data-pct]').forEach(el => {
+                    const pct = parseInt(el.getAttribute('data-pct'));
+                    if (el.closest('.bar')) {
+                        el.style.width = pct + '%';
+                    } else {
+                        el.style.height = pct + '%';
+                    }
+                });
+            }, 400);
+        }
+
+        // ———————————————————————————————————————
+        // LANGUAGE SWITCH
+        // ———————————————————————————————————————
+        document.getElementById('langToggle').addEventListener('click', function() {
+            lang = lang === 'en' ? 'fa' : 'en';
+            render(lang);
+        });
+
+        // ———————————————————————————————————————
+        // MENU
+        // ———————————————————————————————————————
+        const menuStar = document.getElementById('menuStar');
+        const popup = document.getElementById('popupMenu');
+        menuStar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            popup.classList.toggle('open');
+        });
+        document.addEventListener('click', () => popup.classList.remove('open'));
+        popup.querySelectorAll('a').forEach(a => a.addEventListener('click', () => popup.classList.remove('open')));
+
+        // ———————————————————————————————————————
+        // LENIS + GSAP
+        // ———————————————————————————————————————
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smoothWheel: true,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        // simple reveal
+        gsap.utils.toArray('.page').forEach((page, i) => {
+            if (i === 0) return;
+            gsap.from(page, {
+                scrollTrigger: {
+                    trigger: page,
+                    start: 'top 85%',
+                    toggleActions: 'play none none reverse',
+                },
+                opacity: 0.2,
+                y: 40,
+                duration: 0.8,
+                ease: 'power2.out',
+            });
+        });
+
+        // ———————————————————————————————————————
+        // LOADER
+        // ———————————————————————————————————————
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hide');
+                document.getElementById('site').classList.add('show');
+            }, 800);
+        });
+
+        // ———————————————————————————————————————
+        // INIT
+        // ———————————————————————————————————————
+        render('en');
+
+        // copy protection
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey && ['c', 'v', 'x', 'u', 's', 'p', 'a'].includes(e.key)) e.preventDefault();
+            if (e.key === 'F12') e.preventDefault();
+        });
+    </script>
+</body>
+</html>
